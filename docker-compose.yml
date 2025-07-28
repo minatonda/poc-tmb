@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: poc_tmb
+    ports:
+      - "5432:5432"
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: poc-azurite
+    command: "azurite --loose --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+  orderapi:
+    build:
+      context: ./backend
+      dockerfile: OrderApi/Dockerfile
+    container_name: poc-orderapi
+    ports:
+      - "5000:5000"
+    dns:
+      - 8.8.8.8
+    depends_on:
+      - postgres
+      - azurite
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=poc_tmb;Username=postgres;Password=postgres
+      - Azure__ServiceBus__ConnectionString=Endpoint=sb://poc-tmb-servicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=IGgPzyvJtaliYb+M2lddl2lZphk0LtBIO+ASbDnaSlI=
+    working_dir: /app
+    command: [ "dotnet", "OrderApi.dll" ]
+
+
+  orderworker:
+    build:
+      context: ./backend
+      dockerfile: OrderWorker/Dockerfile
+    container_name: poc-orderworker
+    dns:
+      - 8.8.8.8
+    depends_on:
+      - orderapi
+      - azurite
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=poc_tmb;Username=postgres;Password=postgres
+      - Azure__ServiceBus__ConnectionString=Endpoint=sb://poc-tmb-servicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=IGgPzyvJtaliYb+M2lddl2lZphk0LtBIO+ASbDnaSlI=
+
+
+  frontend:
+    build:
+      context: ./frontend/order-frontend
+      dockerfile: Dockerfile
+    container_name: poc-frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - orderapi
+
+volumes:
+  pgdata:
