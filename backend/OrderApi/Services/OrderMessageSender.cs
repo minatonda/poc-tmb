@@ -15,6 +15,10 @@ namespace OrderApi.Services
             _configuration = configuration;
             var connStr = _configuration["ServiceBus:ConnectionString"];
             _queueName = _configuration["ServiceBus:QueueName"];
+
+            Console.WriteLine($"[DEBUG] ServiceBus ConnectionString: {connStr}");
+            Console.WriteLine($"[DEBUG] ServiceBus QueueName: {_queueName}");
+
             _client = new ServiceBusClient(connStr);
         }
 

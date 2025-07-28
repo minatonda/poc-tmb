@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y curl netcat-openbsd
 # Copia a aplicação publicada para /app
 COPY --from=build /app/publish/ /app/
 
+# Copia o appsettings.json para /app
+COPY OrderApi/appsettings.json /app/appsettings.json
+
 # Copia o código fonte para /src/OrderApi para rodar migrations no entrypoint
 COPY OrderApi /src/OrderApi
 

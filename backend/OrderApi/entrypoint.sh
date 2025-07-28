@@ -13,10 +13,16 @@ do
   echo "🔁 PostgreSQL não disponível - aguardando..."
   sleep 3
 done
-echo "✅ PostgreSQL está pronto. Aplicando migrations..."
+echo "✅ PostgreSQL está pronto. Construindo projeto e aplicando migrations..."
 
 cd /src/OrderApi
-dotnet-ef database update --project OrderApi.csproj --startup-project OrderApi.csproj --no-build
+dotnet build OrderApi.csproj -c Release
+
+# Debug: listar arquivos gerados para verificar se deps.json existe
+echo "📁 Conteúdo do diretório de build:"
+ls -l ./bin/Release/net8.0/
+
+dotnet-ef database update --project OrderApi.csproj --startup-project OrderApi.csproj --configuration Release
 
 echo "🚀 Iniciando aplicação..."
 cd /app

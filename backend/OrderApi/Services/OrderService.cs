@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OrderApi.Data;
+using OrderApi.Hubs;
 using OrderApi.Models;
 
 namespace OrderApi.Services
@@ -9,9 +11,12 @@ namespace OrderApi.Services
         private readonly OrderDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public OrderService(OrderDbContext context, IConfiguration configuration)
+        private readonly IHubContext<OrderHub> _hubContext;
+
+        public OrderService(OrderDbContext context, IHubContext<OrderHub> hubContext, IConfiguration configuration)
         {
             _context = context;
+            _hubContext = hubContext;
             _configuration = configuration;
         }
 
@@ -39,6 +44,7 @@ namespace OrderApi.Services
                 order.Status = status;
                 await _context.SaveChangesAsync();
             }
+            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", order);
         }
     }
 }
