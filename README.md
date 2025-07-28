@@ -17,7 +17,7 @@
 
 ```bash
 git clone <URL_DO_REPOSITORIO>
-cd poctmb
+cd poc-tmb
 ```
 
 ### 2. Construir e subir os containers
@@ -91,4 +91,3 @@ O frontend se conecta automaticamente ao Hub SignalR para receber notificações
 
 Matheus Carvalho  
 E-mail: mtw.nda@hotmail.com  
-Projeto POCTMB - Versão 1.0  
