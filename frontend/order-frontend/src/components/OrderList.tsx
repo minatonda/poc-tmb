@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { Order } from "../types/order";
+import { Order, OrderStatus } from "../types/order";
 import { OrderApiService } from "../api/order.api-service";
 
 interface Props {
   service: OrderApiService;
   onSelect: (order: Order) => void;
 }
+
+const mapStatus = {
+  [0]: "Pendente",
+  [1]: "Processando",
+  [2]: "Finalizado",
+};
 
 export default function OrderList({ service, onSelect }: Props) {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -17,7 +23,7 @@ export default function OrderList({ service, onSelect }: Props) {
     // Callback para atualizar a ordem específica na lista quando receber notificação
     const handleOrderUpdate = (updatedOrder: Order) => {
       setOrders((currentOrders) => {
-        const index = currentOrders.findIndex(o => o.id === updatedOrder.id);
+        const index = currentOrders.findIndex((o) => o.id === updatedOrder.id);
         if (index === -1) {
           // Se a ordem não existir, adiciona no topo
           return [updatedOrder, ...currentOrders];
@@ -61,7 +67,7 @@ export default function OrderList({ service, onSelect }: Props) {
               <td>{order.cliente}</td>
               <td>{order.produto}</td>
               <td>R$ {order.valor.toFixed(2)}</td>
-              <td>{order.status}</td>
+              <td>{mapStatus[order.status]}</td>
               <td>{new Date(order.dataCriacao).toLocaleString()}</td>
             </tr>
           ))}
